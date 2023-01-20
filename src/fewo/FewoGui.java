@@ -1,12 +1,16 @@
 package fewo;
 
 import javax.swing.*;
+import javax.swing.text.html.parser.Entity;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class FewoGUI extends JFrame {
     final static String LAENDER[] = {"Deutschland", "Frankreich", "Italien", "Schweden"};
@@ -17,8 +21,10 @@ public class FewoGUI extends JFrame {
     JCheckBox sauna, fernseher, pool, sauna1;
     JButton goButton;
     LocalDate arrivalDate, departureDate;
-    String landString, ausstString;
-    LinkedList<String> ausstListe = new LinkedList();
+    String landString;
+    JList ergebnisListe;
+    LinkedList<String> ausstListe;
+    DefaultListModel<String> model;
 
     public FewoGUI() {
 
@@ -45,6 +51,7 @@ public class FewoGUI extends JFrame {
         departurePanel.add(departure);
 
         // ausstattung
+        ausstListe = new LinkedList();
         sauna = new JCheckBox("Sauna");
         sauna.addActionListener(new ActionListener() {
             @Override
@@ -97,16 +104,35 @@ public class FewoGUI extends JFrame {
         goButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                
                 landString = LAENDER[landcombo.getSelectedIndex()];
                 arrivalDate = LocalDate.parse(FewoGUI.this.arrival.getText());
                 departureDate = LocalDate.parse(FewoGUI.this.departure.getText());
-                StringBuilder s = new StringBuilder();
-                for (String str : ausstListe) {
-                    s.append(str).append(", ");
-                }
-                ausstString = s.toString();
+
+                Map<String, Double> rs;
                 // SQL-Suche                                                         <<< hier wird die Suchmethode mit den Argumenten landString, arrivalDate,... aufgerufen
-                ResultSet rs = FewoToSQL.fewoSuche(landString, arrivalDate.toString(), departureDate.toString(), ausstListe.getFirst());
+                if (ausstListe.isEmpty()) {
+
+                    rs = FewoToSQL.fewoSuche(landString, new Date(arrivalDate.getYear() - 1900, arrivalDate.getMonthValue(), arrivalDate.getDayOfMonth()), new Date(departureDate.getYear() - 1900, departureDate.getMonthValue(), departureDate.getDayOfMonth()), null);
+
+                } else {
+
+                    rs = FewoToSQL.fewoSuche(landString, new Date(arrivalDate.getYear() - 1900, arrivalDate.getMonthValue(), arrivalDate.getDayOfMonth()), new Date(departureDate.getYear() - 1900, departureDate.getMonthValue(), departureDate.getDayOfMonth()), ausstListe.getFirst());
+                }
+                model.clear();
+
+                if (rs.size() == 0) {
+                    model.add(0, "keine Ergebnisse");
+
+                } else {
+                    int i = 0;
+
+                    for (Map.Entry<String, Double> entry : rs.entrySet()) {
+                        System.out.printf("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue());
+                        model.add(i++, String.format("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue()));
+                    }
+                }
+                FewoGUI.this.ergebnisListe.setModel(model);
             }
         });
         goPanel = new JPanel();
@@ -124,11 +150,17 @@ public class FewoGUI extends JFrame {
         suchleiste.add(goPanel);
 
         // ergebnisleiste
+        model = new DefaultListModel();
+        model.addElement("keine Ergebnisse");
+        ergebnisListe = new JList(model);
         ergebnisleiste = new JPanel();
+        ergebnisleiste.add(ergebnisListe);
 
         // this
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setLayout(new GridLayout(2, 1));
         this.add(suchleiste);
+        this.add(ergebnisleiste);
         this.pack();
         this.setVisible(true);
     }
