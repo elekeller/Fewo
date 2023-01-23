@@ -18,19 +18,6 @@ public class FewoToSQL {
     private final static SimpleDateFormat dateformat = new SimpleDateFormat("dd.mm.yyyy");
     private final static String DATEREGEX = "([0-2][0-9]|3[0-1]).(0[0-9]|1[0-2]).[0-9]{4}";
 
-    private final static String SELECT0 = "SELECT DISTINCT f.fewoname ,av.bewertung as bewertung FROM dbsys38.fewo f, dbsys38.addresse a, dbsys38.hatausstattung hat, dbsys38.buchung b, dbsys38.avgBewertung av " +
-            "WHERE f.addrID = a.addrID " +
-            "AND a.landname = ? ";
-    private final static String SELECT1 = "AND hat.ausstbeschreibung = ";
-    private final static String SELECT2 = "AND f.fewoID = av.fewoID " +
-            "AND f.fewoID NOT IN " +
-            "(SELECT f.fewoID FROM dbsys38.fewo f, dbsys38.buchung b " +
-            "WHERE f.fewoID = b.fewoID " +
-            "AND (b.arrival <= ? AND b.departure >= ?) " +
-            "OR (b.arrival >= ? AND b.departure <= ?) " +
-            "OR (b.arrival <= ? AND b.departure <= ? AND b.departure >=?) " +
-            "OR (b.arrival >= ? AND b.arrival <= ? AND b.departure >= ?) ) ";
-
     public static Map<String, Double> fewoSuche(String land, Date arrival, Date departure, String ausstattung) {
         Map<String, Double> l = new TreeMap();
 
@@ -49,33 +36,12 @@ public class FewoToSQL {
 
             // Statement-Objekt erzeugen
             if (ausstattung != null) {
-                /*
-                String ausstStr = "";
-                for (String s : ausstattung)
-                {
-                    ausstStr += SELECT1;
-                    ausstStr = ausstStr + " '" + s + "' ";
-                }
-                 */
 
-/*
-                System.out.println("SELECT DISTINCT f.fewoname, av.bewertung as bewertung FROM dbsys38.fewo f, dbsys38.addresse a, dbsys38.hatausstattung hat, dbsys38.buchung b, dbsys38.avgBewertung av " +
-                        "WHERE f.addrID = a.addrID " +
-                        "AND a.landname = '?' " +
-                        "AND hat.ausstbeschreibung = ?" +
-                        "AND f.fewoID = av.fewoID " +
-                        "AND f.fewoID NOT IN " +
-                        "(SELECT f.fewoID FROM dbsys38.fewo f, dbsys38.buchung b " +
-                        "WHERE f.fewoID = b.fewoID " +
-                        "AND (b.arrival <= TO_DATE('?', 'yyyy-mm-dd') AND b.departure >= TO_DATE('?', 'yyyy-mm-dd')) " +
-                        "OR (b.arrival >= TO_DATE('?', 'yyyy-mm-dd') AND b.departure <= TO_DATE('?', 'yyyy-mm-dd')) " +
-                        "OR (b.arrival <= TO_DATE('?', 'yyyy-mm-dd') AND b.departure <= '?' AND b.departure >= TO_DATE('?', 'yyyy-mm-dd')) " +
-                        "OR (b.arrival >= TO_DATE('?', 'yyyy-mm-dd') AND b.arrival <= '?' AND b.departure >= TO_DATE('?', 'yyyy-mm-dd')) ) ");
-*/
 
                 ps = conn.prepareStatement("SELECT DISTINCT f.fewoname ,av.bewertung as bewertung FROM dbsys38.fewo f, dbsys38.addresse a, dbsys38.hatausstattung hat, dbsys38.buchung b, dbsys38.avgBewertung av " +
                         "WHERE f.addrID = a.addrID " +
                         "AND a.landname = ? " +
+                        "AND hat.fewoID = f.fewoID " +
                         "AND hat.ausstbeschreibung = ? " +
                         "AND f.fewoID = av.fewoID " +
                         "AND f.fewoID NOT IN " +
@@ -154,5 +120,21 @@ public class FewoToSQL {
             System.out.println();
         }
         return l;
+    }
+
+    //Buchungsnr/Buchungsdatum/Arrival/Departure/BewertungsID/Bewertung/Rechnungsnr/FewoID/Mail
+    public static boolean fewoBuchung() {
+        Connection conn;
+        ResultSet rset = null;
+        Statement stmt;
+        try {
+            DriverManager.registerDriver(new oracle.jdbc.OracleDriver());                // Treiber laden
+            String url = "jdbc:oracle:thin:@oracle19c.in.htwg-konstanz.de:1521:ora19c"; // String für DB-Connection
+            conn = DriverManager.getConnection(url, "dbsys29", "dbsys29");                        // Verbindung erstellen
+
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);            // Transaction Isolations-Level setzen
+            conn.setAutoCommit(false);                                                    // Kein automatisches Commit
+            stmt = conn.createStatement();
+            PreparedStatement ps;
     }
 }

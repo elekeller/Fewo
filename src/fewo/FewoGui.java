@@ -1,13 +1,10 @@
 package fewo;
 
 import javax.swing.*;
-import javax.swing.text.html.parser.Entity;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.Map;
@@ -15,11 +12,11 @@ import java.util.Map;
 public class FewoGUI extends JFrame {
     final static String LAENDER[] = {"Deutschland", "Frankreich", "Italien", "Schweden"};
     final static String AUSST[] = {"Sauna", "Fernseher", "Pool", "SAUNA"};
-    JPanel suchleiste, ergebnisleiste, landPanel, arrivalPanel, departurePanel, ausstattungenPanel, ausstattungsTitelPanel, ausstattungsPanel, goPanel;
+    JPanel suchleiste, ergebnisleiste, ergebnisPanel, buchenPanel, landPanel, arrivalPanel, departurePanel, ausstattungenPanel, ausstattungsTitelPanel, ausstattungsPanel, goPanel;
     JComboBox landcombo;
     JTextField arrival, departure;
     JCheckBox sauna, fernseher, pool, sauna1;
-    JButton goButton;
+    JButton goButton, buchenButton;
     LocalDate arrivalDate, departureDate;
     String landString;
     JList ergebnisListe;
@@ -64,26 +61,19 @@ public class FewoGUI extends JFrame {
         pool.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (ausstListe.contains(AUSST[1])) ausstListe.remove(AUSST[1]);
-                else ausstListe.add(AUSST[1]);
+                if (ausstListe.contains("Pool")) ausstListe.remove("Pool");
+                else ausstListe.add("Pool");
             }
         });
         fernseher = new JCheckBox("Fernseher");
         fernseher.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (ausstListe.contains(AUSST[2])) ausstListe.remove(AUSST[2]);
-                else ausstListe.add(AUSST[2]);
+                if (ausstListe.contains("Fernseher")) ausstListe.remove("Fernseher");
+                else ausstListe.add("Fernseher");
             }
         });
-        sauna1 = new JCheckBox("SAUNA");
-        sauna1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (ausstListe.contains(AUSST[3])) ausstListe.remove(AUSST[3]);
-                else ausstListe.add(AUSST[3]);
-            }
-        });
+
 
         ausstattungsTitelPanel = new JPanel();
         ausstattungsTitelPanel.add(new JLabel("Ausstattung"));
@@ -92,7 +82,7 @@ public class FewoGUI extends JFrame {
         ausstattungenPanel.add(sauna);
         ausstattungenPanel.add(pool);
         ausstattungenPanel.add(fernseher);
-        ausstattungenPanel.add(sauna1);
+
 
         ausstattungsPanel = new JPanel();
         ausstattungsPanel.setLayout(new GridLayout(2, 1));
@@ -104,7 +94,8 @@ public class FewoGUI extends JFrame {
         goButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
+
                 landString = LAENDER[landcombo.getSelectedIndex()];
                 arrivalDate = LocalDate.parse(FewoGUI.this.arrival.getText());
                 departureDate = LocalDate.parse(FewoGUI.this.departure.getText());
@@ -123,6 +114,7 @@ public class FewoGUI extends JFrame {
 
                 if (rs.size() == 0) {
                     model.add(0, "keine Ergebnisse");
+                    buchenButton.setVisible(false);
 
                 } else {
                     int i = 0;
@@ -131,6 +123,7 @@ public class FewoGUI extends JFrame {
                         System.out.printf("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue());
                         model.add(i++, String.format("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue()));
                     }
+                    buchenButton.setVisible(true);
                 }
                 FewoGUI.this.ergebnisListe.setModel(model);
             }
@@ -139,6 +132,7 @@ public class FewoGUI extends JFrame {
         goPanel.setLayout(new GridLayout(2, 1));
         goPanel.add(new JLabel(""));
         goPanel.add(goButton);
+
 
         // suchleiste
         suchleiste = new JPanel();
@@ -149,12 +143,19 @@ public class FewoGUI extends JFrame {
         suchleiste.add(ausstattungsPanel);
         suchleiste.add(goPanel);
 
+        // buchenButton
+        buchenButton = new JButton("Buchen");
+
+        buchenPanel = new JPanel();
+        buchenPanel.add(buchenButton);
         // ergebnisleiste
         model = new DefaultListModel();
         model.addElement("keine Ergebnisse");
         ergebnisListe = new JList(model);
         ergebnisleiste = new JPanel();
+        ergebnisleiste.setLayout(new GridLayout(1, 2));
         ergebnisleiste.add(ergebnisListe);
+        ergebnisleiste.add(buchenPanel);
 
         // this
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
