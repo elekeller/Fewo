@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class AnmeldeFenster extends JFrame {
-    JTextField usernameField, passwordField;
+    JTextField mailField, passwordField;
     JButton signinButton;
 
     private String mail, password;
@@ -15,14 +15,21 @@ public class AnmeldeFenster extends JFrame {
         mail = new String();
         password = new String();
 
-        usernameField = new JTextField("");
+        mailField = new JTextField("");
         passwordField = new JTextField("");
 
-
+        // signinButton
+        signinButton = new JButton("Anmelden");
+        signinButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if ()
+            }
+        });
         // this
         this.setLayout(new GridLayout(5, 1));
-        this.add(new JLabel("Benutzername:"));
-        this.add(usernameField);
+        this.add(new JLabel("Mail:"));
+        this.add(mailField);
         this.add(new JLabel("Passwort:"));
         this.add(passwordField);
 
