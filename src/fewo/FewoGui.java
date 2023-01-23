@@ -149,10 +149,22 @@ public class FewoGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AnmeldeFenster anmelden = new AnmeldeFenster();
+
+                String mail = anmelden.usernameField.getText();
+
+
+                arrivalDate = LocalDate.parse(FewoGUI.this.arrival.getText());
+                departureDate = LocalDate.parse(FewoGUI.this.departure.getText());
+
+                //FewoToSQL.fewoSuche(buchungsnr, new Date(arrivalDate.getYear() - 1900, arrivalDate.getMonthValue(), arrivalDate.getDayOfMonth()), new Date(departureDate.getYear() - 1900, departureDate.getMonthValue(), departureDate.getDayOfMonth()), rechnungsnr, fewoID, mail);
+
             }
+
+
         });
         buchenPanel = new JPanel();
         buchenPanel.add(buchenButton);
+        buchenButton.setVisible(false);
         // ergebnisleiste
         model = new DefaultListModel();
         model.addElement("keine Ergebnisse");
@@ -161,6 +173,7 @@ public class FewoGUI extends JFrame {
         ergebnisleiste.setLayout(new GridLayout(1, 2));
         ergebnisleiste.add(ergebnisListe);
         ergebnisleiste.add(buchenPanel);
+
 
         // this
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);

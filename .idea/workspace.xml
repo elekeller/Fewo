@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9ce41837-42e7-453d-9153-76c7a4d60ed3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/fewo/AnmeldeFenster.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Fewo/fewo/FewoGUI.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Fewo/fewo/FewoGUI.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fewo/FewoGui.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fewo/FewoGUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/fewo/FewoToSQL.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/fewo/FewoToSQL.java" afterDir="false" />
-    </list>
+    <list default="true" id="9ce41837-42e7-453d-9153-76c7a4d60ed3" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,15 +31,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "C:/GitHub/Fewo",
-    "node.js.selected.package.tslint": "(autodetect)"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/GitHub/Fewo&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="FewoGUI" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="fewo.FewoGUI" />
@@ -75,7 +69,7 @@
       <option name="presentableId" value="Default" />
       <updated>1673994606327</updated>
       <workItem from="1673996120410" duration="918000" />
-      <workItem from="1674487921204" duration="5982000" />
+      <workItem from="1674487921204" duration="7486000" />
     </task>
     <servers />
   </component>
