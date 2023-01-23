@@ -21,6 +21,7 @@ public class FewoGUI extends JFrame {
     String landString;
     JList ergebnisListe;
     LinkedList<String> ausstListe;
+    java.util.List<String> idList;
     DefaultListModel<String> model;
 
     public FewoGUI() {
@@ -100,7 +101,7 @@ public class FewoGUI extends JFrame {
                 arrivalDate = LocalDate.parse(FewoGUI.this.arrival.getText());
                 departureDate = LocalDate.parse(FewoGUI.this.departure.getText());
 
-                Map<String, Double> rs;
+                Map<String, FewoToSQL.IDBewwertung> rs;
                 // SQL-Suche                                                         <<< hier wird die Suchmethode mit den Argumenten landString, arrivalDate,... aufgerufen
                 if (ausstListe.isEmpty()) {
 
@@ -111,7 +112,7 @@ public class FewoGUI extends JFrame {
                     rs = FewoToSQL.fewoSuche(landString, new Date(arrivalDate.getYear() - 1900, arrivalDate.getMonthValue(), arrivalDate.getDayOfMonth()), new Date(departureDate.getYear() - 1900, departureDate.getMonthValue(), departureDate.getDayOfMonth()), ausstListe.getFirst());
                 }
                 model.clear();
-
+                idList.clear();
                 if (rs.size() == 0) {
                     model.add(0, "keine Ergebnisse");
                     buchenButton.setVisible(false);
@@ -119,9 +120,10 @@ public class FewoGUI extends JFrame {
                 } else {
                     int i = 0;
 
-                    for (Map.Entry<String, Double> entry : rs.entrySet()) {
-                        System.out.printf("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue());
-                        model.add(i++, String.format("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue()));
+                    for (Map.Entry<String, FewoToSQL.IDBewwertung> entry : rs.entrySet()) {
+                        System.out.println("Name: " + entry.getKey() + " Bewertung: " + entry.getValue().getBewertung() + " ID: " + entry.getValue().getID());
+                        model.add(i++, String.format("Name: %s Bewertung: %.1f\n", entry.getKey(), entry.getValue().getBewertung()));
+                        idList.add(entry.getValue().getID());
                     }
                     buchenButton.setVisible(true);
                 }
@@ -148,13 +150,20 @@ public class FewoGUI extends JFrame {
         buchenButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AnmeldeFenster anmelden = new AnmeldeFenster();
-
-                String mail = anmelden.usernameField.getText();
 
 
-                arrivalDate = LocalDate.parse(FewoGUI.this.arrival.getText());
-                departureDate = LocalDate.parse(FewoGUI.this.departure.getText());
+                Date arrival = new Date(arrivalDate.getYear() - 1900, arrivalDate.getMonthValue(), arrivalDate.getDayOfMonth());
+                Date departure = new Date(departureDate.getYear() - 1900, departureDate.getMonthValue(), departureDate.getDayOfMonth());
+                String fewoID = idList.get(FewoGUI.this.ergebnisListe.getSelectedIndex());
+
+                Thread t = new Thread() {
+                    public void run() {
+                        System.out.println("he");
+                        AnmeldeFenster anmelden = new AnmeldeFenster(arrival, departure, fewoID);
+                    }
+                };
+                t.run();
+
 
                 //FewoToSQL.fewoSuche(buchungsnr, new Date(arrivalDate.getYear() - 1900, arrivalDate.getMonthValue(), arrivalDate.getDayOfMonth()), new Date(departureDate.getYear() - 1900, departureDate.getMonthValue(), departureDate.getDayOfMonth()), rechnungsnr, fewoID, mail);
 
@@ -166,6 +175,7 @@ public class FewoGUI extends JFrame {
         buchenPanel.add(buchenButton);
         buchenButton.setVisible(false);
         // ergebnisleiste
+        idList = new LinkedList();
         model = new DefaultListModel();
         model.addElement("keine Ergebnisse");
         ergebnisListe = new JList(model);

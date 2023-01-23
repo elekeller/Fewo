@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.text.*;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -21,8 +22,30 @@ public class FewoToSQL {
     private final static SimpleDateFormat dateformat = new SimpleDateFormat("dd.mm.yyyy");
     private final static String DATEREGEX = "([0-2][0-9]|3[0-1]).(0[0-9]|1[0-2]).[0-9]{4}";
 
-    public static Map<String, Double> fewoSuche(String land, Date arrival, Date departure, String ausstattung) {
-        Map<String, Double> l = new TreeMap();
+    static class IDBewwertung {
+        String id;
+        Double bewertung;
+
+        public IDBewwertung(String id, Double bewertung) {
+            this.id = id;
+            this.bewertung = bewertung;
+        }
+
+        public Double getBewertung() {
+            return this.bewertung;
+        }
+
+        public String getID() {
+            return this.id;
+        }
+
+        public String toString() {
+            return String.format("ID: %s Bewertung: %.1f\n", id, bewertung);
+        }
+    }
+
+    public static Map<String, IDBewwertung> fewoSuche(String land, Date arrival, Date departure, String ausstattung) {
+        Map<String, IDBewwertung> l = new TreeMap();
 
         Connection conn;
         ResultSet rset = null;
@@ -41,7 +64,7 @@ public class FewoToSQL {
             if (ausstattung != null) {
 
 
-                ps = conn.prepareStatement("SELECT DISTINCT f.fewoname ,av.bewertung as bewertung FROM dbsys38.fewo f, dbsys38.addresse a, dbsys38.hatausstattung hat, dbsys38.buchung b, dbsys38.avgBewertung av " +
+                ps = conn.prepareStatement("SELECT DISTINCT f.fewoID, f.fewoname ,av.bewertung as bewertung FROM dbsys38.fewo f, dbsys38.addresse a, dbsys38.hatausstattung hat, dbsys38.buchung b, dbsys38.avgBewertung av " +
                         "WHERE f.addrID = a.addrID " +
                         "AND a.landname = ? " +
                         "AND hat.fewoID = f.fewoID " +
@@ -65,14 +88,14 @@ public class FewoToSQL {
                 ps.setDate(6, departure);
                 ps.setDate(7, arrival);
                 ps.setDate(8, departure);
-                ps.setDate(9, departure);
+                ps.setDate(9, arrival);
                 ps.setDate(10, arrival);
-                ps.setDate(11, arrival);
+                ps.setDate(11, departure);
                 ps.setDate(12, departure);
 
             } else {
 
-                ps = conn.prepareStatement("SELECT DISTINCT f.fewoname, av.bewertung as bewertung FROM dbsys38.hatausstattung hat, dbsys38.fewo f, dbsys38.addresse a, dbsys38.buchung b, dbsys38.avgBewertung av " +
+                ps = conn.prepareStatement("SELECT DISTINCT f.fewoID, f.fewoname, av.bewertung as bewertung FROM dbsys38.hatausstattung hat, dbsys38.fewo f, dbsys38.addresse a, dbsys38.buchung b, dbsys38.avgBewertung av " +
                         "WHERE f.addrID = a.addrID " +
                         "AND hat.fewoid = f.fewoid " +
                         "AND a.landname = ? " +
@@ -82,7 +105,7 @@ public class FewoToSQL {
                         "WHERE f.fewoID = b.fewoID " +
                         "AND (b.arrival <= ? AND b.departure >= ?) " +
                         "OR (b.arrival >= ? AND b.departure <= ?) " +
-                        "OR (b.arrival <= ? AND b.departure <= ? AND b.departure >=?) " +
+                        "OR (b.arrival <= ? AND b.departure <= ? AND b.departure >= ?) " +
                         "OR (b.arrival >= ? AND b.arrival <= ? AND b.departure >= ?) ) ");
 
                 ps.setString(1, land);
@@ -92,9 +115,9 @@ public class FewoToSQL {
                 ps.setDate(5, departure);
                 ps.setDate(6, arrival);
                 ps.setDate(7, departure);
-                ps.setDate(8, departure);
+                ps.setDate(8, arrival);
                 ps.setDate(9, arrival);
-                ps.setDate(10, arrival);
+                ps.setDate(10, departure);
                 ps.setDate(11, departure);
             }
 
@@ -102,10 +125,13 @@ public class FewoToSQL {
 
             while (rset.next()) {
 
+
                 String s = rset.getString("fewoname");
                 String s1 = rset.getString("bewertung");
-                System.out.printf("Name: %s Bewertung: %.1f\n", s, Double.parseDouble(s1));
-                l.put(s, Double.parseDouble(s1));
+                String s2 = rset.getString("fewoID");
+                System.out.printf("ID: %s Name: %s Bewertung: %.1f\n", s2, s, Double.parseDouble(s1));
+                IDBewwertung idbw = new IDBewwertung(s2, Double.parseDouble(s1));
+                l.put(s, idbw);
             }
             stmt.close();                                                                // Verbindung trennen
             //conn.commit();
@@ -128,10 +154,11 @@ public class FewoToSQL {
     //Buchungsnr/Buchungsdatum/Arrival/Departure/BewertungsID/Bewertung/Rechnungsnr/FewoID/Mail
 
 
-    public static boolean fewoBuchung(String buchungsnr, Date arrival, Date departure, String rechnungsnr, String fewoId, String mail) {
+    public static boolean fewoBuchung(Date arrival, Date departure, String fewoId, String mail) {
 
         Connection conn;
-        ResultSet rset = null;
+        ResultSet rset;
+        int success = 0;
         Statement stmt;
         try {
             DriverManager.registerDriver(new OracleDriver());                // Treiber laden
@@ -143,11 +170,19 @@ public class FewoToSQL {
             stmt = conn.createStatement();
             PreparedStatement ps;
 
+            rset = stmt.executeQuery("SELECT MAX(b.buchungsnr) as buchungsnr FROM dbsys38.Buchung b");
+            rset.next();
+            String buchungsnr = rset.getString("buchungsnr");
+            buchungsnr = String.format("%8d", Integer.parseInt(buchungsnr) + 1).replace(" ", "0");
+            rset = stmt.executeQuery("SELECT MAX(b.rechnungsnr) as rechnungsnr FROM dbsys38.Buchung b");
+            rset.next();
+            String rechnungsnr = rset.getString("rechnungsnr");
+            rechnungsnr = String.format("%8d", Integer.parseInt(rechnungsnr) + 1).replace(" ", "0");
+
 
             // Statement-Objekt erzeugen
-            ps = conn.prepareStatement("INSERT INTO Buchung(Buchungsnr, Buchungsdatum, Arrival, Departure, Rechnungsnr, FewoID, Mail) Values " +
+            ps = conn.prepareStatement("INSERT INTO dbsys38.Buchung(Buchungsnr, Buchungsdatum, Arrival, Departure, Rechnungsnr, FewoID, Mail) Values " +
                     "(?,?,?,?,?,?,?)");
-
             Date buchungsdatum = new Date(LocalDate.now().getYear() - 1900, LocalDate.now().getMonthValue(), LocalDate.now().getDayOfMonth());
 
             ps.setString(1, buchungsnr);    //Buchungsnr
@@ -158,8 +193,9 @@ public class FewoToSQL {
             ps.setString(6, fewoId);        //FewoID
             ps.setString(7, mail);          //Mail
 
+            success = ps.executeUpdate();
             stmt.close();                                                                // Verbindung trennen
-            //conn.commit();
+            conn.commit();
             conn.close();
         } catch (SQLException se) {                                                        // SQL-Fehler abfangen
             System.out.println();
@@ -173,7 +209,8 @@ public class FewoToSQL {
             System.out.println("EXITING WITH FAILURE ... !!!");
             System.out.println();
         }
-        return true;
+        return 0 < success;
 
     }
 }
+// Max.Mustermann@gmail.com
