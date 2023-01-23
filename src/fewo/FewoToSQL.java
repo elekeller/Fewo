@@ -1,10 +1,13 @@
 package fewo;
 
+import oracle.jdbc.OracleDriver;
+
 import java.awt.*;
 import java.io.*;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.text.*;
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -123,12 +126,12 @@ public class FewoToSQL {
     }
 
     //Buchungsnr/Buchungsdatum/Arrival/Departure/BewertungsID/Bewertung/Rechnungsnr/FewoID/Mail
-    public static boolean fewoBuchung() {
+    public static boolean fewoBuchung(String buchungsnr, Date arrival, Date departure, String rechnungsnr, String fewoId, String mail) {
         Connection conn;
         ResultSet rset = null;
         Statement stmt;
         try {
-            DriverManager.registerDriver(new oracle.jdbc.OracleDriver());                // Treiber laden
+            DriverManager.registerDriver(new OracleDriver());                // Treiber laden
             String url = "jdbc:oracle:thin:@oracle19c.in.htwg-konstanz.de:1521:ora19c"; // String für DB-Connection
             conn = DriverManager.getConnection(url, "dbsys29", "dbsys29");                        // Verbindung erstellen
 
@@ -136,5 +139,35 @@ public class FewoToSQL {
             conn.setAutoCommit(false);                                                    // Kein automatisches Commit
             stmt = conn.createStatement();
             PreparedStatement ps;
-    }
+
+            // Statement-Objekt erzeugen
+            ps = conn.prepareStatement("INSERT INTO Buchung(Buchungsnr, Buchungsdatum, Arrival, Departure, Rechnungsnr, FewoID, Mail) Values " +
+                    "(?,?,?,?,?,?,?)");
+
+            Date buchungsdatum = new Date(LocalDate.now().getYear() - 1900, LocalDate.now().getMonthValue(), LocalDate.now().getDayOfMonth());
+
+            ps.setString(1, buchungsnr);    //Buchungsnr
+            ps.setDate(2, buchungsdatum);   //Buchungsdatum
+            ps.setDate(3, arrival);         //Arrival
+            ps.setDate(4, departure);       //Departure
+            ps.setString(5, rechnungsnr);   //Rechnungsnr
+            ps.setString(6, fewoId);        //FewoID
+            ps.setString(7, mail);          //Mail
+
+            stmt.close();                                                                // Verbindung trennen
+            //conn.commit();
+            conn.close();
+        } catch (SQLException se) {                                                        // SQL-Fehler abfangen
+            System.out.println();
+            System.out
+                    .println("SQL Exception occurred while establishing connection to DBS: "
+                            + se.getMessage());
+            System.out.println("- SQL state  : " + se.getSQLState());
+            System.out.println("- Message    : " + se.getMessage());
+            System.out.println("- Vendor code: " + se.getErrorCode());
+            System.out.println();
+            System.out.println("EXITING WITH FAILURE ... !!!");
+            System.out.println();
+        }
+        return true;
 }
