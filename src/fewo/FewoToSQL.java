@@ -126,7 +126,11 @@ public class FewoToSQL {
     }
 
     //Buchungsnr/Buchungsdatum/Arrival/Departure/BewertungsID/Bewertung/Rechnungsnr/FewoID/Mail
+<<<<<<< Updated upstream
     public static boolean fewoBuchung(String buchungsnr, Date arrival, Date departure, String rechnungsnr, String fewoId, String mail) {
+=======
+/*    public static boolean fewoBuchung() {
+>>>>>>> Stashed changes
         Connection conn;
         ResultSet rset = null;
         Statement stmt;
@@ -139,6 +143,7 @@ public class FewoToSQL {
             conn.setAutoCommit(false);                                                    // Kein automatisches Commit
             stmt = conn.createStatement();
             PreparedStatement ps;
+<<<<<<< Updated upstream
 
             // Statement-Objekt erzeugen
             ps = conn.prepareStatement("INSERT INTO Buchung(Buchungsnr, Buchungsdatum, Arrival, Departure, Rechnungsnr, FewoID, Mail) Values " +
@@ -170,4 +175,7 @@ public class FewoToSQL {
             System.out.println();
         }
         return true;
+=======
+    }*/
+>>>>>>> Stashed changes
 }
