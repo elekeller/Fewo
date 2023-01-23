@@ -148,7 +148,13 @@ public class FewoGUI extends JFrame {
         buchenButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AnmeldeFenster anmelden = new AnmeldeFenster();
+                Thread t = new Thread() {
+                    public void run() {
+                        System.out.println("he");
+                        AnmeldeFenster anmelden = new AnmeldeFenster();
+                    }
+                };
+                t.run();
             }
         });
         buchenPanel = new JPanel();

@@ -125,8 +125,7 @@ public class FewoToSQL {
         return l;
     }
 
-    //Buchungsnr/Buchungsdatum/Arrival/Departure/BewertungsID/Bewertung/Rechnungsnr/FewoID/Mail
-<<<<<<< Updated upstream
+/*
     public static boolean fewoBuchung(String buchungsnr, Date arrival, Date departure, String rechnungsnr, String fewoId, String mail) {
 =======
 /*    public static boolean fewoBuchung() {
@@ -177,5 +176,4 @@ public class FewoToSQL {
         return true;
 =======
     }*/
->>>>>>> Stashed changes
 }
